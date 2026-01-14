@@ -175,17 +175,22 @@ function GroupDetail({ group, activeTab, setActiveTab, onBack }: GroupDetailProp
 }
 
 function TopicsContent({ group }: { group: ResearchGroup }) {
-  // Parse topics content - check if it has HTML structure or is plain text
-  const hasHtmlContent = group.topics && (
-    group.topics.includes('<') || 
-    group.topics.includes('&lt;')
-  );
+  // Check if content has HTML tags
+  const hasHtmlContent = group.topics && /<[a-z][\s\S]*>/i.test(group.topics);
+
+  // Convert plain text to HTML preserving line breaks and whitespace
+  const formatPlainText = (text: string): string => {
+    // Convert newlines to <br> tags and preserve multiple spaces
+    return text
+      .replace(/\n/g, '<br>')
+      .replace(/  /g, '&nbsp;&nbsp;');
+  };
 
   return (
     <div className="space-y-6">
       {/* Description paragraph */}
       {group.description && (
-        <p className="text-foreground leading-relaxed">
+        <p className="text-foreground leading-relaxed whitespace-pre-wrap">
           {group.description}
         </p>
       )}
@@ -193,30 +198,17 @@ function TopicsContent({ group }: { group: ResearchGroup }) {
       {/* Topics / Main Research Fields */}
       {group.topics && (
         <div className="space-y-4">
-          {hasHtmlContent ? (
-            <div 
-              className="prose prose-sm max-w-none text-foreground
-                prose-headings:font-bold prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-3
-                prose-ul:list-disc prose-ul:pl-6 prose-ul:space-y-2
-                prose-li:text-foreground
-                prose-strong:font-bold
-                prose-a:text-primary prose-a:hover:underline"
-              dangerouslySetInnerHTML={{ __html: group.topics }}
-            />
-          ) : (
-            <>
-              <h3 className="font-bold text-foreground uppercase tracking-wide">
-                DOMENII PRINCIPALE DE CERCETARE
-              </h3>
-              <ul className="list-disc pl-6 space-y-2">
-                {group.topics.split('\n').filter(line => line.trim()).map((line, idx) => (
-                  <li key={idx} className="text-foreground">
-                    {line.replace(/^[-•*]\s*/, '')}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
+          <div 
+            className="prose prose-sm max-w-none text-foreground
+              prose-headings:font-bold prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-3
+              prose-ul:list-disc prose-ul:pl-6 prose-ul:space-y-2
+              prose-li:text-foreground
+              prose-strong:font-bold
+              prose-a:text-primary prose-a:hover:underline"
+            dangerouslySetInnerHTML={{ 
+              __html: hasHtmlContent ? group.topics : formatPlainText(group.topics) 
+            }}
+          />
         </div>
       )}
 
