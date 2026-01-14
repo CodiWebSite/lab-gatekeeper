@@ -59,33 +59,37 @@ export function useResearchGroups(labId: string | null) {
   });
 }
 
-// Fetch publications for a lab
-export function usePublications(labId: string | null, year?: number | null) {
+// Types for publication years content
+export interface PublicationYear {
+  id: string;
+  lab_id: string;
+  year: number;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Fetch publication years with content for a lab
+export function usePublicationYearsContent(labId: string | null) {
   return useQuery({
-    queryKey: ['publications', labId, year],
+    queryKey: ['publication_years_content', labId],
     queryFn: async () => {
       if (!labId) return [];
       
-      let query = supabase
-        .from('publications')
+      const { data, error } = await supabase
+        .from('publication_years')
         .select('*')
         .eq('lab_id', labId)
-        .order('year', { ascending: false })
-        .order('display_order', { ascending: true });
+        .order('year', { ascending: false });
 
-      if (year) {
-        query = query.eq('year', year);
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
-      return data as Publication[];
+      return data as PublicationYear[];
     },
     enabled: !!labId,
   });
 }
 
-// Fetch publication years for a lab
+// Fetch just the years list for a lab (for year chips)
 export function usePublicationYears(labId: string | null) {
   return useQuery({
     queryKey: ['publication_years', labId],
@@ -93,18 +97,36 @@ export function usePublicationYears(labId: string | null) {
       if (!labId) return [];
       
       const { data, error } = await supabase
-        .from('publications')
+        .from('publication_years')
         .select('year')
         .eq('lab_id', labId)
         .order('year', { ascending: false });
 
       if (error) throw error;
-      
-      // Get unique years
-      const years = [...new Set(data.map(p => p.year))];
-      return years;
+      return data.map(p => p.year);
     },
     enabled: !!labId,
+  });
+}
+
+// Fetch content for a specific year
+export function usePublicationYearContent(labId: string | null, year: number | null) {
+  return useQuery({
+    queryKey: ['publication_year_content', labId, year],
+    queryFn: async () => {
+      if (!labId || !year) return null;
+      
+      const { data, error } = await supabase
+        .from('publication_years')
+        .select('*')
+        .eq('lab_id', labId)
+        .eq('year', year)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as PublicationYear | null;
+    },
+    enabled: !!labId && !!year,
   });
 }
 
@@ -226,61 +248,52 @@ export function useDeleteResearchGroup() {
   });
 }
 
-// Similar mutations for publications, projects, infrastructure...
-export function useCreatePublication() {
+// Upsert publication year content (insert or update)
+export function useUpsertPublicationYear() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: Omit<Publication, 'id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async ({ labId, year, content }: { labId: string; year: number; content: string }) => {
       const { error } = await supabase
-        .from('publications')
-        .insert(data);
+        .from('publication_years')
+        .upsert({ 
+          lab_id: labId, 
+          year, 
+          content,
+          updated_at: new Date().toISOString()
+        }, { 
+          onConflict: 'lab_id,year' 
+        });
 
       if (error) throw error;
+      return { labId, year };
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['publications', variables.lab_id] });
-      queryClient.invalidateQueries({ queryKey: ['publication_years', variables.lab_id] });
-    },
-  });
-}
-
-export function useUpdatePublication() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ id, labId, data }: { id: string; labId: string; data: Partial<Publication> }) => {
-      const { error } = await supabase
-        .from('publications')
-        .update(data)
-        .eq('id', id);
-
-      if (error) throw error;
-      return labId;
-    },
-    onSuccess: (labId) => {
-      queryClient.invalidateQueries({ queryKey: ['publications', labId] });
+    onSuccess: ({ labId, year }) => {
       queryClient.invalidateQueries({ queryKey: ['publication_years', labId] });
+      queryClient.invalidateQueries({ queryKey: ['publication_years_content', labId] });
+      queryClient.invalidateQueries({ queryKey: ['publication_year_content', labId, year] });
     },
   });
 }
 
-export function useDeletePublication() {
+// Delete publication year
+export function useDeletePublicationYear() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, labId }: { id: string; labId: string }) => {
+    mutationFn: async ({ labId, year }: { labId: string; year: number }) => {
       const { error } = await supabase
-        .from('publications')
+        .from('publication_years')
         .delete()
-        .eq('id', id);
+        .eq('lab_id', labId)
+        .eq('year', year);
 
       if (error) throw error;
       return labId;
     },
     onSuccess: (labId) => {
-      queryClient.invalidateQueries({ queryKey: ['publications', labId] });
       queryClient.invalidateQueries({ queryKey: ['publication_years', labId] });
+      queryClient.invalidateQueries({ queryKey: ['publication_years_content', labId] });
     },
   });
 }
