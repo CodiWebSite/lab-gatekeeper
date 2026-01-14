@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { FileUploadField } from './FileUploadField';
 
 interface GroupMembersEditorProps {
   groupId: string;
@@ -241,27 +242,23 @@ export function GroupMembersEditor({ groupId }: GroupMembersEditorProps) {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="photo_url">URL Poză</Label>
-              <Input
-                id="photo_url"
-                type="url"
-                value={formData.photo_url}
-                onChange={(e) => setFormData(prev => ({ ...prev, photo_url: e.target.value }))}
-                placeholder="https://..."
-              />
-            </div>
+            <FileUploadField
+              label="Poză profil"
+              value={formData.photo_url}
+              onChange={(url) => setFormData(prev => ({ ...prev, photo_url: url }))}
+              accept="image/*"
+              folder="members"
+              type="image"
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="cv_url">URL CV (PDF)</Label>
-              <Input
-                id="cv_url"
-                type="url"
-                value={formData.cv_url}
-                onChange={(e) => setFormData(prev => ({ ...prev, cv_url: e.target.value }))}
-                placeholder="https://..."
-              />
-            </div>
+            <FileUploadField
+              label="CV (PDF)"
+              value={formData.cv_url}
+              onChange={(url) => setFormData(prev => ({ ...prev, cv_url: url }))}
+              accept=".pdf,application/pdf"
+              folder="cvs"
+              type="document"
+            />
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => {

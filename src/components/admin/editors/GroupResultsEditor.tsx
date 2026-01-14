@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Pencil, Trash2, Save, Image, FileText, Bold, Italic, Underline, Link } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, Image, FileText, Bold, Italic, Underline, Link, List } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { FileUploadField } from './FileUploadField';
 
 interface GroupResultsEditorProps {
   groupId: string;
@@ -118,7 +119,7 @@ export function GroupResultsEditor({ groupId }: GroupResultsEditorProps) {
     }
   };
 
-  const applyFormatting = (format: 'bold' | 'italic' | 'underline' | 'link') => {
+  const applyFormatting = (format: 'bold' | 'italic' | 'underline' | 'link' | 'list') => {
     const textarea = document.getElementById('content') as HTMLTextAreaElement;
     if (!textarea) return;
 
@@ -143,6 +144,14 @@ export function GroupResultsEditor({ groupId }: GroupResultsEditorProps) {
           newText = `<a href="${url}" target="_blank">${selectedText || url}</a>`;
         } else {
           return;
+        }
+        break;
+      case 'list':
+        const lines = selectedText.split('\n').filter(l => l.trim());
+        if (lines.length > 0) {
+          newText = '<ul>\n' + lines.map(l => `  <li>${l.trim()}</li>`).join('\n') + '\n</ul>';
+        } else {
+          newText = '<ul>\n  <li>Element 1</li>\n  <li>Element 2</li>\n</ul>';
         }
         break;
     }
@@ -236,17 +245,20 @@ export function GroupResultsEditor({ groupId }: GroupResultsEditorProps) {
             <div className="space-y-2">
               <Label htmlFor="content">Conținut</Label>
               <div className="flex gap-1 mb-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('bold')}>
+                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('bold')} title="Bold">
                   <Bold className="w-4 h-4" />
                 </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('italic')}>
+                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('italic')} title="Italic">
                   <Italic className="w-4 h-4" />
                 </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('underline')}>
+                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('underline')} title="Subliniat">
                   <Underline className="w-4 h-4" />
                 </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('link')}>
+                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('link')} title="Link">
                   <Link className="w-4 h-4" />
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('list')} title="Listă">
+                  <List className="w-4 h-4" />
                 </Button>
               </div>
               <Textarea
@@ -258,23 +270,14 @@ export function GroupResultsEditor({ groupId }: GroupResultsEditorProps) {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="image_url">URL Imagine</Label>
-              <Input
-                id="image_url"
-                type="url"
-                value={formData.image_url}
-                onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                placeholder="https://..."
-              />
-              {formData.image_url && (
-                <img 
-                  src={formData.image_url} 
-                  alt="Preview" 
-                  className="mt-2 max-h-48 rounded border border-border"
-                />
-              )}
-            </div>
+            <FileUploadField
+              label="Imagine"
+              value={formData.image_url}
+              onChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+              accept="image/*"
+              folder="results"
+              type="image"
+            />
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => {
