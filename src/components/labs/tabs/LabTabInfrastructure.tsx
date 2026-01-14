@@ -1,5 +1,5 @@
 import { useInfrastructure } from '@/hooks/useLaboratories';
-import { Wrench, Mail, ExternalLink, User } from 'lucide-react';
+import { Wrench, Mail, ExternalLink, User, FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface LabTabInfrastructureProps {
@@ -95,6 +95,18 @@ export function LabTabInfrastructure({ labId }: LabTabInfrastructureProps) {
                 >
                   <ExternalLink className="w-4 h-4" />
                   <span>Mai multe informații</span>
+                </a>
+              )}
+
+              {(item as any).document_url && (
+                <a
+                  href={(item as any).document_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary hover:underline"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Manual / Document</span>
                 </a>
               )}
             </div>
