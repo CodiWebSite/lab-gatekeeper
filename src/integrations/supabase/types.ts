@@ -110,6 +110,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           display_order: number | null
+          document_url: string | null
           external_link: string | null
           id: string
           image_url: string | null
@@ -124,6 +125,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          document_url?: string | null
           external_link?: string | null
           id?: string
           image_url?: string | null
@@ -138,6 +140,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          document_url?: string | null
           external_link?: string | null
           id?: string
           image_url?: string | null

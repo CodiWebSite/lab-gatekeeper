@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Pencil, Trash2, Save, Wrench, Upload, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, Wrench, Upload, X, FileText } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -53,6 +53,7 @@ export function InfrastructureEditor({ labId }: InfrastructureEditorProps) {
     responsible_name: '',
     responsible_email: '',
     external_link: '',
+    document_url: '',
     display_order: 0,
   });
 
@@ -65,6 +66,7 @@ export function InfrastructureEditor({ labId }: InfrastructureEditorProps) {
       responsible_name: '',
       responsible_email: '',
       external_link: '',
+      document_url: '',
       display_order: 0,
     });
   };
@@ -78,6 +80,7 @@ export function InfrastructureEditor({ labId }: InfrastructureEditorProps) {
       responsible_name: item.responsible_name || '',
       responsible_email: item.responsible_email || '',
       external_link: item.external_link || '',
+      document_url: (item as any).document_url || '',
       display_order: item.display_order,
     });
     setEditingItem(item);
@@ -110,6 +113,28 @@ export function InfrastructureEditor({ labId }: InfrastructureEditorProps) {
     toast.success('Imaginea a fost încărcată');
   };
 
+  const handleDocumentUpload = async (file: File) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const filePath = `infrastructure/${labId}/documents/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('lab-uploads')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      toast.error('Eroare la încărcarea documentului');
+      return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('lab-uploads')
+      .getPublicUrl(filePath);
+
+    setFormData(prev => ({ ...prev, document_url: publicUrl }));
+    toast.success('Documentul a fost încărcat');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -122,6 +147,7 @@ export function InfrastructureEditor({ labId }: InfrastructureEditorProps) {
       responsible_name: formData.responsible_name || null,
       responsible_email: formData.responsible_email || null,
       external_link: formData.external_link || null,
+      document_url: formData.document_url || null,
       display_order: formData.display_order,
     };
 
@@ -327,6 +353,49 @@ export function InfrastructureEditor({ labId }: InfrastructureEditorProps) {
                 onChange={(e) => setFormData(prev => ({ ...prev, external_link: e.target.value }))}
                 placeholder="https://..."
               />
+            </div>
+
+            {/* PDF Document upload */}
+            <div className="space-y-2">
+              <Label>Document / Manual (PDF)</Label>
+              {formData.document_url ? (
+                <div className="flex items-center gap-3 p-3 bg-secondary rounded-lg">
+                  <FileText className="w-8 h-8 text-primary" />
+                  <div className="flex-1 min-w-0">
+                    <a 
+                      href={formData.document_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline truncate block"
+                    >
+                      {formData.document_url.split('/').pop()}
+                    </a>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="w-8 h-8 flex-shrink-0"
+                    onClick={() => setFormData(prev => ({ ...prev, document_url: '' }))}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+                  <FileText className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Încarcă PDF sau document</span>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleDocumentUpload(file);
+                    }}
+                  />
+                </label>
+              )}
             </div>
 
             <div className="flex justify-end gap-2 pt-4">

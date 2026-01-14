@@ -125,6 +125,7 @@ export interface Infrastructure {
   responsible_name: string | null;
   responsible_email: string | null;
   external_link: string | null;
+  document_url: string | null;
   display_order: number;
   created_at: string;
   updated_at: string;
