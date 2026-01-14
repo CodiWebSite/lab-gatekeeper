@@ -38,6 +38,32 @@ export interface ResearchGroup {
   leader_name: string | null;
   leader_email: string | null;
   members: string[] | null;
+  topics: string | null;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GroupMember {
+  id: string;
+  group_id: string;
+  name: string;
+  position: string | null;
+  email: string | null;
+  description: string | null;
+  photo_url: string | null;
+  cv_url: string | null;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GroupResult {
+  id: string;
+  group_id: string;
+  title: string | null;
+  content: string | null;
+  image_url: string | null;
   display_order: number;
   created_at: string;
   updated_at: string;
