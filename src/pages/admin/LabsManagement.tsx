@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useLaboratories, useUpdateLaboratory } from '@/hooks/useLaboratories';
 import { Laboratory } from '@/types/database';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +12,8 @@ import {
   Building2,
   User,
   MoreVertical,
-  ExternalLink
+  ExternalLink,
+  Settings2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -143,9 +145,15 @@ export default function LabsManagement() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-popover">
+                    <DropdownMenuItem asChild>
+                      <Link to={`/admin/labs/${lab.id}`}>
+                        <Settings2 className="w-4 h-4 mr-2" />
+                        Editează complet
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setEditingLab(lab)}>
                       <Pencil className="w-4 h-4 mr-2" />
-                      Editează
+                      Editează rapid
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <a href={`/labs?lab=${lab.id}`} target="_blank" rel="noopener noreferrer">

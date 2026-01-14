@@ -11,6 +11,7 @@ import AdminOverview from "./pages/admin/Overview";
 import LabsManagement from "./pages/admin/LabsManagement";
 import UsersManagement from "./pages/admin/UsersManagement";
 import MyLab from "./pages/admin/MyLab";
+import LabEditor from "./pages/admin/LabEditor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />}>
               <Route index element={<AdminOverview />} />
               <Route path="labs" element={<LabsManagement />} />
+              <Route path="labs/:labId" element={<LabEditor />} />
               <Route path="users" element={<UsersManagement />} />
               <Route path="my-lab" element={<MyLab />} />
             </Route>
