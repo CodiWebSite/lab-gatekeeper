@@ -14,6 +14,97 @@ export type Database = {
   }
   public: {
     Tables: {
+      group_members: {
+        Row: {
+          created_at: string
+          cv_url: string | null
+          description: string | null
+          display_order: number | null
+          email: string | null
+          group_id: string
+          id: string
+          name: string
+          photo_url: string | null
+          position: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cv_url?: string | null
+          description?: string | null
+          display_order?: number | null
+          email?: string | null
+          group_id: string
+          id?: string
+          name: string
+          photo_url?: string | null
+          position?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cv_url?: string | null
+          description?: string | null
+          display_order?: number | null
+          email?: string | null
+          group_id?: string
+          id?: string
+          name?: string
+          photo_url?: string | null
+          position?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "research_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_results: {
+        Row: {
+          content: string | null
+          created_at: string
+          display_order: number | null
+          group_id: string
+          id: string
+          image_url: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          display_order?: number | null
+          group_id: string
+          id?: string
+          image_url?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          display_order?: number | null
+          group_id?: string
+          id?: string
+          image_url?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_results_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "research_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       infrastructure: {
         Row: {
           created_at: string | null
@@ -370,6 +461,7 @@ export type Database = {
           leader_name: string | null
           members: string[] | null
           name: string
+          topics: string | null
           updated_at: string | null
         }
         Insert: {
@@ -382,6 +474,7 @@ export type Database = {
           leader_name?: string | null
           members?: string[] | null
           name: string
+          topics?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -394,6 +487,7 @@ export type Database = {
           leader_name?: string | null
           members?: string[] | null
           name?: string
+          topics?: string | null
           updated_at?: string | null
         }
         Relationships: [
