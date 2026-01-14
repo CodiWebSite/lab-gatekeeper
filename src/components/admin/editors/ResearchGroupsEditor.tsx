@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Pencil, Trash2, Save, Users, ChevronDown, ChevronUp, Bold, Italic, Underline, Link } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, Users, ChevronDown, ChevronUp, Bold, Italic, Underline, Link, List, Heading } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -92,7 +92,7 @@ export function ResearchGroupsEditor({ labId }: ResearchGroupsEditorProps) {
     setIsCreating(true);
   };
 
-  const applyFormatting = (format: 'bold' | 'italic' | 'underline' | 'link') => {
+  const applyFormatting = (format: 'bold' | 'italic' | 'underline' | 'link' | 'list' | 'heading') => {
     const textarea = document.getElementById('topics') as HTMLTextAreaElement;
     if (!textarea) return;
 
@@ -117,6 +117,17 @@ export function ResearchGroupsEditor({ labId }: ResearchGroupsEditorProps) {
           newText = `<a href="${url}" target="_blank">${selectedText || url}</a>`;
         } else {
           return;
+        }
+        break;
+      case 'heading':
+        newText = `<h3>${selectedText || 'TITLU SECȚIUNE'}</h3>`;
+        break;
+      case 'list':
+        const lines = selectedText.split('\n').filter(l => l.trim());
+        if (lines.length > 0) {
+          newText = '<ul>\n' + lines.map(l => `  <li>${l.trim().replace(/^[-•*]\s*/, '')}</li>`).join('\n') + '\n</ul>';
+        } else {
+          newText = '<ul>\n  <li>Element 1</li>\n  <li>Element 2</li>\n  <li>Element 3</li>\n</ul>';
         }
         break;
     }
@@ -298,18 +309,24 @@ export function ResearchGroupsEditor({ labId }: ResearchGroupsEditorProps) {
 
             <div className="space-y-2">
               <Label htmlFor="topics">Tematici (conținut formatat)</Label>
-              <div className="flex gap-1 mb-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('bold')}>
+              <div className="flex flex-wrap gap-1 mb-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('heading')} title="Titlu secțiune">
+                  <Heading className="w-4 h-4" />
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('bold')} title="Bold">
                   <Bold className="w-4 h-4" />
                 </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('italic')}>
+                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('italic')} title="Italic">
                   <Italic className="w-4 h-4" />
                 </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('underline')}>
+                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('underline')} title="Subliniat">
                   <Underline className="w-4 h-4" />
                 </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('link')}>
+                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('link')} title="Link">
                   <Link className="w-4 h-4" />
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('list')} title="Listă">
+                  <List className="w-4 h-4" />
                 </Button>
               </div>
               <Textarea
