@@ -2,95 +2,126 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* ICMPP Laboratories Design System
+   Academic/Research aesthetic: Clean, professional, trustworthy
+   Colors: White + Light Gray + ICMPP Blue accent
 */
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap');
 
 @layer base {
   :root {
+    /* Core colors - ICMPP Blue theme */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 215 25% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 25% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 215 25% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - ICMPP Blue */
+    --primary: 210 75% 40%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Light gray */
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 215 25% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted - Softer gray */
+    --muted: 210 15% 94%;
+    --muted-foreground: 215 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Lighter blue */
+    --accent: 210 60% 95%;
+    --accent-foreground: 210 75% 35%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 210 75% 40%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Sidebar */
+    --sidebar-background: 210 20% 98%;
+    --sidebar-foreground: 215 25% 25%;
+    --sidebar-primary: 210 75% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 30% 94%;
+    --sidebar-accent-foreground: 215 25% 20%;
+    --sidebar-border: 210 20% 90%;
+    --sidebar-ring: 210 75% 50%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Custom ICMPP tokens */
+    --icmpp-blue: 210 75% 40%;
+    --icmpp-blue-light: 210 60% 95%;
+    --icmpp-blue-dark: 210 80% 30%;
+    --icmpp-gray: 210 15% 94%;
+    --icmpp-gray-dark: 215 15% 35%;
+    --icmpp-success: 142 70% 40%;
+    --icmpp-warning: 45 93% 47%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Gradients */
+    --gradient-header: linear-gradient(135deg, hsl(210 75% 40%) 0%, hsl(210 80% 30%) 100%);
+    --gradient-card-hover: linear-gradient(180deg, hsl(210 60% 98%) 0%, hsl(210 30% 96%) 100%);
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* Shadows */
+    --shadow-card: 0 2px 8px -2px hsl(210 30% 20% / 0.08), 0 4px 16px -4px hsl(210 30% 20% / 0.06);
+    --shadow-card-hover: 0 8px 24px -4px hsl(210 30% 20% / 0.12), 0 12px 32px -8px hsl(210 30% 20% / 0.08);
+    --shadow-button: 0 2px 4px -1px hsl(210 75% 40% / 0.2);
 
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Typography */
+    --font-sans: 'Source Sans 3', system-ui, sans-serif;
+    --font-heading: 'Merriweather', Georgia, serif;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 215 30% 8%;
+    --foreground: 210 20% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 215 28% 12%;
+    --card-foreground: 210 20% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 215 28% 12%;
+    --popover-foreground: 210 20% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 210 70% 55%;
+    --primary-foreground: 215 30% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 215 25% 18%;
+    --secondary-foreground: 210 20% 90%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 215 25% 18%;
+    --muted-foreground: 210 15% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 210 40% 20%;
+    --accent-foreground: 210 70% 70%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 65% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 215 25% 20%;
+    --input: 215 25% 20%;
+    --ring: 210 70% 55%;
+
+    --sidebar-background: 215 28% 10%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 210 70% 55%;
+    --sidebar-primary-foreground: 215 30% 8%;
+    --sidebar-accent: 215 25% 16%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 215 25% 18%;
+    --sidebar-ring: 210 70% 55%;
+
+    --icmpp-blue: 210 70% 55%;
+    --icmpp-blue-light: 210 40% 20%;
+    --icmpp-blue-dark: 210 70% 45%;
+    --icmpp-gray: 215 25% 18%;
+    --icmpp-gray-dark: 210 15% 60%;
   }
 }
 
@@ -99,7 +130,143 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Lab Card Component */
+  .lab-card {
+    @apply relative bg-card rounded-lg border border-border overflow-hidden transition-all duration-300;
+    box-shadow: var(--shadow-card);
+  }
+
+  .lab-card:hover {
+    @apply border-primary/30;
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+  }
+
+  /* Tab Navigation */
+  .tab-trigger {
+    @apply relative px-4 py-3 text-sm font-medium text-muted-foreground transition-colors;
+  }
+
+  .tab-trigger[data-state="active"] {
+    @apply text-primary;
+  }
+
+  .tab-trigger[data-state="active"]::after {
+    content: '';
+    @apply absolute bottom-0 left-0 right-0 h-0.5 bg-primary;
+  }
+
+  /* Admin Panel Styles */
+  .admin-sidebar {
+    @apply bg-sidebar border-r border-sidebar-border;
+  }
+
+  .admin-nav-item {
+    @apply flex items-center gap-3 px-4 py-3 text-sidebar-foreground rounded-lg transition-colors;
+  }
+
+  .admin-nav-item:hover {
+    @apply bg-sidebar-accent text-sidebar-accent-foreground;
+  }
+
+  .admin-nav-item.active {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  /* Infrastructure Grid */
+  .infra-card {
+    @apply grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6 p-6 bg-card rounded-lg border border-border;
+  }
+
+  /* Publication List */
+  .publication-item {
+    @apply py-4 border-b border-border last:border-0;
+  }
+
+  /* Form Styles */
+  .form-section {
+    @apply space-y-6 p-6 bg-card rounded-lg border border-border;
+  }
+
+  /* Header gradient */
+  .header-gradient {
+    background: var(--gradient-header);
+  }
+
+  /* Search box */
+  .search-box {
+    @apply relative;
+  }
+
+  .search-box input {
+    @apply w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all;
+  }
+
+  /* Year filter chips */
+  .year-chip {
+    @apply px-3 py-1.5 text-sm font-medium rounded-full transition-colors cursor-pointer;
+  }
+
+  .year-chip.active {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .year-chip:not(.active) {
+    @apply bg-secondary text-secondary-foreground hover:bg-accent;
+  }
+
+  /* Embed container for WordPress */
+  .embed-container {
+    @apply min-h-screen bg-background;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
