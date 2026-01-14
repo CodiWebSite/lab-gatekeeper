@@ -1,9 +1,13 @@
 import { useSearchParams } from 'react-router-dom';
 import { LabList } from '@/components/labs/LabList';
 import { LabDetail } from '@/components/labs/LabDetail';
+import { useIframeResize } from '@/hooks/useIframeResize';
 
 export default function Labs() {
   const [searchParams] = useSearchParams();
+  
+  // Enable iframe auto-height for WordPress embedding
+  useIframeResize();
   
   const view = searchParams.get('view');
   const labId = searchParams.get('lab');
