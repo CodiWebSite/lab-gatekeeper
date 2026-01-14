@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   useGroupResults,
   useCreateGroupResult,
@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Pencil, Trash2, Save, Image, FileText, Bold, Italic, Underline, Link, List } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, Image, FileText, Bold, Italic, Underline, Link, List, ImagePlus, Upload } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -29,7 +29,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { FileUploadField } from './FileUploadField';
+import { useFileUpload } from '@/hooks/useFileUpload';
 
 interface GroupResultsEditorProps {
   groupId: string;
@@ -50,6 +50,16 @@ export function GroupResultsEditor({ groupId }: GroupResultsEditorProps) {
     content: '',
     image_url: '',
     display_order: 0,
+  });
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const { upload, uploading: imageUploading } = useFileUpload({
+    bucket: 'research-groups',
+    folder: 'results-inline',
+    maxSizeMB: 5,
+    allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
   });
 
   const resetForm = () => {
@@ -119,8 +129,50 @@ export function GroupResultsEditor({ groupId }: GroupResultsEditorProps) {
     }
   };
 
+  const insertImageAtCursor = async (file: File) => {
+    const url = await upload(file);
+    if (!url) return;
+
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      // If no textarea ref, just append to content
+      const imageTag = `\n<div class="my-4"><img src="${url}" alt="Imagine" class="max-w-full rounded-lg" /></div>\n`;
+      setFormData(prev => ({ ...prev, content: prev.content + imageTag }));
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    
+    const imageTag = `\n<div class="my-4"><img src="${url}" alt="Imagine" class="max-w-full rounded-lg" /></div>\n`;
+    
+    const newContent = formData.content.substring(0, start) + imageTag + formData.content.substring(end);
+    setFormData(prev => ({ ...prev, content: newContent }));
+    
+    // Set cursor position after the inserted image
+    setTimeout(() => {
+      if (textarea) {
+        const newPosition = start + imageTag.length;
+        textarea.setSelectionRange(newPosition, newPosition);
+        textarea.focus();
+      }
+    }, 0);
+  };
+
+  const handleInlineImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    await insertImageAtCursor(file);
+    
+    // Reset the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const applyFormatting = (format: 'bold' | 'italic' | 'underline' | 'link' | 'list') => {
-    const textarea = document.getElementById('content') as HTMLTextAreaElement;
+    const textarea = textareaRef.current;
     if (!textarea) return;
 
     const start = textarea.selectionStart;
@@ -158,6 +210,15 @@ export function GroupResultsEditor({ groupId }: GroupResultsEditorProps) {
 
     const newContent = formData.content.substring(0, start) + newText + formData.content.substring(end);
     setFormData(prev => ({ ...prev, content: newContent }));
+
+    // Set cursor position after the inserted text
+    setTimeout(() => {
+      if (textarea) {
+        const newPosition = start + newText.length;
+        textarea.setSelectionRange(newPosition, newPosition);
+        textarea.focus();
+      }
+    }, 0);
   };
 
   if (isLoading) {
@@ -225,7 +286,7 @@ export function GroupResultsEditor({ groupId }: GroupResultsEditorProps) {
           resetForm();
         }
       }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingResult ? 'Editează rezultat' : 'Adaugă rezultat nou'}
@@ -243,8 +304,13 @@ export function GroupResultsEditor({ groupId }: GroupResultsEditorProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="content">Conținut</Label>
-              <div className="flex gap-1 mb-2">
+              <Label htmlFor="content">Conținut (text și imagini)</Label>
+              <p className="text-xs text-muted-foreground">
+                Puteți intercala text și imagini. Folosiți butonul "Inserează imagine" pentru a adăuga imagini în conținut.
+              </p>
+              
+              {/* Toolbar */}
+              <div className="flex flex-wrap gap-1 p-2 bg-muted/30 rounded-t-lg border border-b-0">
                 <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('bold')} title="Bold">
                   <Bold className="w-4 h-4" />
                 </Button>
@@ -260,24 +326,60 @@ export function GroupResultsEditor({ groupId }: GroupResultsEditorProps) {
                 <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('list')} title="Listă">
                   <List className="w-4 h-4" />
                 </Button>
+                
+                <div className="w-px h-6 bg-border mx-1 self-center" />
+                
+                {/* Inline Image Upload Button */}
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={imageUploading}
+                  className="bg-primary/10 hover:bg-primary/20"
+                  title="Inserează imagine în text"
+                >
+                  <ImagePlus className="w-4 h-4 mr-1" />
+                  {imageUploading ? 'Se încarcă...' : 'Inserează imagine'}
+                </Button>
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleInlineImageUpload}
+                  className="hidden"
+                />
               </div>
+              
               <Textarea
+                ref={textareaRef}
                 id="content"
                 value={formData.content}
                 onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                rows={6}
-                placeholder="Descrieți rezultatul cercetării..."
+                rows={12}
+                placeholder="Scrieți textul aici... Folosiți butonul 'Inserează imagine' pentru a adăuga imagini oriunde în conținut."
+                className="rounded-t-none font-mono text-sm"
               />
+              
+              {/* Content Preview */}
+              {formData.content && (
+                <div className="mt-4 space-y-2">
+                  <Label className="text-xs text-muted-foreground">Previzualizare:</Label>
+                  <div 
+                    className="p-4 border rounded-lg bg-background prose prose-sm max-w-none
+                      prose-headings:font-bold prose-headings:text-foreground
+                      prose-p:text-foreground prose-p:leading-relaxed
+                      prose-ul:list-disc prose-ul:pl-6
+                      prose-li:text-foreground
+                      prose-strong:font-bold
+                      prose-img:rounded-lg prose-img:my-4
+                      prose-a:text-primary prose-a:hover:underline"
+                    dangerouslySetInnerHTML={{ __html: formData.content }}
+                  />
+                </div>
+              )}
             </div>
-
-            <FileUploadField
-              label="Imagine"
-              value={formData.image_url}
-              onChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
-              accept="image/*"
-              folder="results"
-              type="image"
-            />
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => {
@@ -287,7 +389,7 @@ export function GroupResultsEditor({ groupId }: GroupResultsEditorProps) {
               }}>
                 Anulează
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={imageUploading}>
                 <Save className="w-4 h-4 mr-2" />
                 Salvează
               </Button>
