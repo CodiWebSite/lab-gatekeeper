@@ -53,7 +53,6 @@ export default function AdminDashboard() {
         { icon: LayoutDashboard, label: 'Prezentare', path: '/admin' },
         { icon: Building2, label: 'Laboratoare', path: '/admin/labs' },
         { icon: Users, label: 'Utilizatori', path: '/admin/users' },
-        { icon: Settings, label: 'Setări', path: '/admin/settings' },
       ]
     : [
         { icon: LayoutDashboard, label: 'Prezentare', path: '/admin' },
