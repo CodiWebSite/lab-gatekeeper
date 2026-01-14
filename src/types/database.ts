@@ -23,6 +23,7 @@ export interface Laboratory {
   contact_email: string | null;
   contact_phone: string | null;
   address: string | null;
+  explore_url: string | null;
   display_order: number;
   is_active: boolean;
   created_at: string;
