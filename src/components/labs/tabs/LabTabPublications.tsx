@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { usePublicationYears, usePublicationYearContent } from '@/hooks/useLaboratories';
+import { usePublicationYears, usePublicationEntries } from '@/hooks/useLaboratories';
 import { BookOpen } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -10,7 +10,7 @@ interface LabTabPublicationsProps {
 export function LabTabPublications({ labId }: LabTabPublicationsProps) {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const { data: years, isLoading: yearsLoading } = usePublicationYears(labId);
-  const { data: yearContent, isLoading: contentLoading } = usePublicationYearContent(labId, selectedYear);
+  const { data: entries, isLoading: entriesLoading } = usePublicationEntries(labId, selectedYear);
 
   // Auto-select the first year when years are loaded
   useEffect(() => {
@@ -64,16 +64,17 @@ export function LabTabPublications({ labId }: LabTabPublicationsProps) {
         </h2>
       )}
 
-      {/* Publications content */}
-      {contentLoading ? (
+      {/* Publications list */}
+      {entriesLoading ? (
         <Skeleton className="h-64 w-full" />
-      ) : yearContent?.content ? (
-        <div 
-          className="prose prose-sm max-w-none text-foreground leading-relaxed"
-          style={{ whiteSpace: 'pre-wrap' }}
-        >
-          {yearContent.content}
-        </div>
+      ) : entries && entries.length > 0 ? (
+        <ol className="list-decimal list-outside space-y-1 pl-8 text-justify">
+          {entries.map((entry, index) => (
+            <li key={entry.id} className="pl-2 leading-relaxed">
+              <span className="text-foreground">{entry.content}</span>
+            </li>
+          ))}
+        </ol>
       ) : (
         <div className="text-center py-8 text-muted-foreground">
           <p>Nu există publicații pentru anul {selectedYear}.</p>

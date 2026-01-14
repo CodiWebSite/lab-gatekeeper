@@ -227,6 +227,44 @@ export type Database = {
           },
         ]
       }
+      publication_entries: {
+        Row: {
+          content: string
+          created_at: string
+          display_order: number
+          id: string
+          lab_id: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          lab_id: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          lab_id?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publication_entries_lab_id_fkey"
+            columns: ["lab_id"]
+            isOneToOne: false
+            referencedRelation: "laboratories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       publication_years: {
         Row: {
           content: string
