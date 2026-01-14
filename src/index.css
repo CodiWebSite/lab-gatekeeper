@@ -220,15 +220,15 @@
 
   /* Year filter chips */
   .year-chip {
-    @apply px-3 py-1.5 text-sm font-medium rounded-full transition-colors cursor-pointer;
+    @apply px-4 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer border border-border;
   }
 
   .year-chip.active {
-    @apply bg-primary text-primary-foreground;
+    @apply bg-primary text-primary-foreground border-primary;
   }
 
   .year-chip:not(.active) {
-    @apply bg-secondary text-secondary-foreground hover:bg-accent;
+    @apply bg-card text-foreground hover:bg-accent hover:border-primary/50;
   }
 
   /* Embed container for WordPress */

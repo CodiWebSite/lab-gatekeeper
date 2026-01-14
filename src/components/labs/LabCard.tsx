@@ -44,12 +44,21 @@ export function LabCard({ lab }: LabCardProps) {
           </p>
         )}
 
-        <Link to={`/labs?lab=${lab.id}`}>
-          <Button className="w-full group/btn" variant="default">
-            <span>Explorează</span>
-            <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover/btn:translate-x-1" />
-          </Button>
-        </Link>
+        {lab.explore_url ? (
+          <a href={lab.explore_url} target="_blank" rel="noopener noreferrer">
+            <Button className="w-full group/btn" variant="default">
+              <span>Explorează</span>
+              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover/btn:translate-x-1" />
+            </Button>
+          </a>
+        ) : (
+          <Link to={`/labs?lab=${lab.id}`}>
+            <Button className="w-full group/btn" variant="default">
+              <span>Explorează</span>
+              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover/btn:translate-x-1" />
+            </Button>
+          </Link>
+        )}
       </div>
     </div>
   );

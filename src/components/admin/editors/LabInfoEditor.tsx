@@ -25,6 +25,7 @@ export function LabInfoEditor({ lab }: LabInfoEditorProps) {
     contact_email: lab.contact_email || '',
     contact_phone: lab.contact_phone || '',
     address: lab.address || '',
+    explore_url: lab.explore_url || '',
     logo_url: lab.logo_url || '',
     banner_url: lab.banner_url || '',
   });
@@ -143,6 +144,20 @@ export function LabInfoEditor({ lab }: LabInfoEditorProps) {
             value={formData.address}
             onChange={(e) => handleChange('address', e.target.value)}
           />
+        </div>
+
+        <div className="space-y-2 mt-4">
+          <Label htmlFor="explore_url">Link personalizat "Explorează"</Label>
+          <Input
+            id="explore_url"
+            type="url"
+            value={formData.explore_url}
+            onChange={(e) => handleChange('explore_url', e.target.value)}
+            placeholder="https://... (lasă gol pentru pagina internă)"
+          />
+          <p className="text-xs text-muted-foreground">
+            Dacă este completat, butonul "Explorează" va redirecționa către acest link extern.
+          </p>
         </div>
 
         <div className="space-y-2 mt-4">
