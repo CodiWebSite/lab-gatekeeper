@@ -1,21 +1,18 @@
 import { useState } from 'react';
 import { 
-  usePublicationYearsContent,
-  useUpsertPublicationYear, 
-  useDeletePublicationYear 
+  usePublicationEntries,
+  useCreatePublicationEntry,
+  useUpdatePublicationEntry, 
+  useDeletePublicationEntry,
+  usePublicationYears,
+  PublicationEntry
 } from '@/hooks/useLaboratories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Pencil, Trash2, Save, BookOpen, Calendar } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Plus, Trash2, Save, BookOpen, Calendar, GripVertical } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,217 +30,247 @@ interface PublicationsEditorProps {
 }
 
 export function PublicationsEditor({ labId }: PublicationsEditorProps) {
-  const { data: publicationYears, isLoading } = usePublicationYearsContent(labId);
-  const upsertYear = useUpsertPublicationYear();
-  const deleteYear = useDeletePublicationYear();
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [newYear, setNewYear] = useState<number>(new Date().getFullYear());
+  const [showNewYearInput, setShowNewYearInput] = useState(false);
+  const [deletingEntry, setDeletingEntry] = useState<PublicationEntry | null>(null);
+  
+  const { data: years, isLoading: yearsLoading } = usePublicationYears(labId);
+  const { data: entries, isLoading: entriesLoading } = usePublicationEntries(labId, selectedYear);
+  
+  const createEntry = useCreatePublicationEntry();
+  const updateEntry = useUpdatePublicationEntry();
+  const deleteEntry = useDeletePublicationEntry();
 
-  const [editingYear, setEditingYear] = useState<number | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [deletingYear, setDeletingYear] = useState<number | null>(null);
+  // Local state for editing entries
+  const [editedEntries, setEditedEntries] = useState<Record<string, string>>({});
+  const [newEntryContent, setNewEntryContent] = useState('');
 
-  const currentYear = new Date().getFullYear();
-
-  const [formData, setFormData] = useState({
-    year: currentYear,
-    content: '',
-  });
-
-  const resetForm = () => {
-    setFormData({
-      year: currentYear,
-      content: '',
-    });
-  };
-
-  const openEdit = (year: number, content: string) => {
-    setFormData({
-      year,
-      content,
-    });
-    setEditingYear(year);
-  };
-
-  const openCreate = () => {
-    resetForm();
-    setIsCreating(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Check if year already exists when creating
-    if (isCreating && publicationYears?.some(p => p.year === formData.year)) {
-      toast.error(`Anul ${formData.year} există deja. Editați-l în loc să creați unul nou.`);
+  const handleAddYear = () => {
+    if (years?.includes(newYear)) {
+      toast.error(`Anul ${newYear} există deja`);
       return;
     }
+    setSelectedYear(newYear);
+    setShowNewYearInput(false);
+  };
+
+  const handleAddEntry = async () => {
+    if (!selectedYear || !newEntryContent.trim()) return;
+
+    const nextOrder = entries ? entries.length : 0;
 
     try {
-      await upsertYear.mutateAsync({ 
-        labId, 
-        year: formData.year, 
-        content: formData.content 
+      await createEntry.mutateAsync({
+        lab_id: labId,
+        year: selectedYear,
+        content: newEntryContent.trim(),
+        display_order: nextOrder
       });
-      
-      toast.success(editingYear !== null ? 'Publicațiile au fost actualizate' : 'Anul a fost adăugat');
-      setEditingYear(null);
-      setIsCreating(false);
-      resetForm();
+      setNewEntryContent('');
+      toast.success('Publicația a fost adăugată');
     } catch (error) {
-      toast.error('Eroare la salvare');
+      toast.error('Eroare la adăugare');
     }
   };
 
-  const handleDelete = async () => {
-    if (deletingYear === null) return;
+  const handleUpdateEntry = async (entry: PublicationEntry) => {
+    const newContent = editedEntries[entry.id];
+    if (newContent === undefined || newContent === entry.content) return;
 
     try {
-      await deleteYear.mutateAsync({ labId, year: deletingYear });
-      toast.success('Anul a fost șters');
-      setDeletingYear(null);
+      await updateEntry.mutateAsync({
+        id: entry.id,
+        labId,
+        data: { content: newContent }
+      });
+      setEditedEntries(prev => {
+        const updated = { ...prev };
+        delete updated[entry.id];
+        return updated;
+      });
+      toast.success('Publicația a fost actualizată');
+    } catch (error) {
+      toast.error('Eroare la actualizare');
+    }
+  };
+
+  const handleDeleteEntry = async () => {
+    if (!deletingEntry) return;
+
+    try {
+      await deleteEntry.mutateAsync({ id: deletingEntry.id, labId });
+      setDeletingEntry(null);
+      toast.success('Publicația a fost ștearsă');
     } catch (error) {
       toast.error('Eroare la ștergere');
     }
   };
 
-  if (isLoading) {
+  const getEntryValue = (entry: PublicationEntry) => {
+    return editedEntries[entry.id] !== undefined ? editedEntries[entry.id] : entry.content;
+  };
+
+  const isEntryModified = (entry: PublicationEntry) => {
+    return editedEntries[entry.id] !== undefined && editedEntries[entry.id] !== entry.content;
+  };
+
+  if (yearsLoading) {
     return (
       <div className="space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-20 w-full" />
-        ))}
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-64 w-full" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="font-heading text-lg font-semibold">Publicații pe ani</h3>
-        <Button onClick={openCreate}>
-          <Plus className="w-4 h-4 mr-2" />
-          Adaugă an
-        </Button>
+      <div className="flex justify-between items-center flex-wrap gap-4">
+        <h3 className="font-heading text-lg font-semibold">Publicații</h3>
+        
+        {showNewYearInput ? (
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min="1900"
+              max="2100"
+              value={newYear}
+              onChange={(e) => setNewYear(parseInt(e.target.value) || new Date().getFullYear())}
+              className="w-24"
+            />
+            <Button size="sm" onClick={handleAddYear}>Adaugă</Button>
+            <Button size="sm" variant="outline" onClick={() => setShowNewYearInput(false)}>Anulează</Button>
+          </div>
+        ) : (
+          <Button onClick={() => setShowNewYearInput(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            An nou
+          </Button>
+        )}
       </div>
 
-      <p className="text-sm text-muted-foreground">
-        Adăugați publicațiile pentru fiecare an. Puteți scrie liber textul cu lista de publicații.
-      </p>
-
-      {publicationYears?.length === 0 ? (
-        <div className="text-center py-12 bg-card rounded-lg border border-border">
-          <BookOpen className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-          <p className="text-muted-foreground">Nu există publicații.</p>
-          <p className="text-sm text-muted-foreground mt-2">Adăugați un an pentru a începe.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {publicationYears?.map((pubYear) => (
-            <div key={pubYear.year} className="p-4 bg-card rounded-lg border border-border">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar className="w-4 h-4 text-primary" />
-                    <h4 className="font-heading font-semibold text-lg text-foreground">{pubYear.year}</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">
-                    {pubYear.content.substring(0, 200)}{pubYear.content.length > 200 ? '...' : ''}
-                  </p>
-                </div>
-                <div className="flex gap-2 flex-shrink-0">
-                  <Button variant="ghost" size="icon" onClick={() => openEdit(pubYear.year, pubYear.content)}>
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => setDeletingYear(pubYear.year)}>
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
-                </div>
-              </div>
-            </div>
+      {/* Year selection */}
+      {years && years.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {years.map((year) => (
+            <button
+              key={year}
+              onClick={() => setSelectedYear(year)}
+              className={`year-chip min-w-[70px] text-center ${selectedYear === year ? 'active' : ''}`}
+            >
+              {year}
+            </button>
           ))}
         </div>
       )}
 
-      {/* Create/Edit Modal */}
-      <Dialog open={isCreating || editingYear !== null} onOpenChange={(open) => {
-        if (!open) {
-          setIsCreating(false);
-          setEditingYear(null);
-          resetForm();
-        }
-      }}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingYear !== null ? `Editează publicațiile pentru ${editingYear}` : 'Adaugă an nou'}
-            </DialogTitle>
-          </DialogHeader>
+      {!selectedYear ? (
+        <div className="text-center py-12 bg-card rounded-lg border border-border">
+          <Calendar className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
+          <p className="text-muted-foreground">
+            {years && years.length > 0 
+              ? 'Selectați un an pentru a vedea și edita publicațiile.'
+              : 'Adăugați un an pentru a începe.'}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            <h4 className="font-heading font-semibold text-xl">{selectedYear}</h4>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-            {isCreating && (
-              <div className="space-y-2">
-                <Label htmlFor="year">An *</Label>
-                <Input
-                  id="year"
-                  type="number"
-                  min="1900"
-                  max="2100"
-                  value={formData.year}
-                  onChange={(e) => setFormData(prev => ({ ...prev, year: parseInt(e.target.value) || currentYear }))}
-                  required
-                  className="w-32"
-                />
+          {entriesLoading ? (
+            <Skeleton className="h-32 w-full" />
+          ) : (
+            <>
+              {/* Existing entries */}
+              <div className="space-y-3">
+                {entries?.map((entry, index) => (
+                  <div key={entry.id} className="flex gap-3 items-start p-3 bg-card rounded-lg border border-border">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Textarea
+                        value={getEntryValue(entry)}
+                        onChange={(e) => setEditedEntries(prev => ({ ...prev, [entry.id]: e.target.value }))}
+                        rows={2}
+                        className="resize-none"
+                        placeholder="Textul publicației..."
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      {isEntryModified(entry) && (
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          onClick={() => handleUpdateEntry(entry)}
+                          disabled={updateEntry.isPending}
+                        >
+                          <Save className="w-4 h-4 text-primary" />
+                        </Button>
+                      )}
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        onClick={() => setDeletingEntry(entry)}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="content">Lista publicațiilor *</Label>
-              <Textarea
-                id="content"
-                value={formData.content}
-                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                rows={15}
-                placeholder={`Introduceți publicațiile pentru anul ${formData.year}...
+              {/* Add new entry */}
+              <div className="flex gap-3 items-start p-3 bg-accent/50 rounded-lg border border-dashed border-border">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-sm font-medium">
+                  {(entries?.length || 0) + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <Textarea
+                    value={newEntryContent}
+                    onChange={(e) => setNewEntryContent(e.target.value)}
+                    rows={2}
+                    className="resize-none"
+                    placeholder="Introduceți textul publicației noi..."
+                  />
+                </div>
+                <Button 
+                  size="icon" 
+                  onClick={handleAddEntry}
+                  disabled={!newEntryContent.trim() || createEntry.isPending}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
 
-Exemplu:
-1. Popescu A., Ionescu B., Titlul articolului; Numele Jurnalului, vol. 12, pp. 123-145 (${formData.year}).
-2. Georgescu C., Alt titlu de articol; Alt Jurnal, 45(3), 567-589 (${formData.year}).`}
-                required
-                className="font-mono text-sm"
-              />
               <p className="text-xs text-muted-foreground">
-                Puteți formata textul cum doriți. Acesta va fi afișat exact așa cum îl introduceți.
+                Fiecare publicație va fi afișată cu numărul corespunzător (1, 2, 3...). 
+                Adăugați câte una pe rând în ordinea dorită.
               </p>
-            </div>
+            </>
+          )}
+        </div>
+      )}
 
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => {
-                setIsCreating(false);
-                setEditingYear(null);
-                resetForm();
-              }}>
-                Anulează
-              </Button>
-              <Button type="submit" disabled={upsertYear.isPending}>
-                <Save className="w-4 h-4 mr-2" />
-                {upsertYear.isPending ? 'Salvare...' : 'Salvează'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Dialog */}
-      <AlertDialog open={deletingYear !== null} onOpenChange={(open) => !open && setDeletingYear(null)}>
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deletingEntry} onOpenChange={(open) => !open && setDeletingEntry(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Șterge anul {deletingYear}?</AlertDialogTitle>
+            <AlertDialogTitle>Șterge publicația?</AlertDialogTitle>
             <AlertDialogDescription>
-              Toate publicațiile pentru acest an vor fi șterse. Această acțiune este ireversibilă.
+              Această acțiune este ireversibilă.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Anulează</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction 
+              onClick={handleDeleteEntry} 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Șterge
             </AlertDialogAction>
           </AlertDialogFooter>
