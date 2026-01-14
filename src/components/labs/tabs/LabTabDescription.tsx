@@ -1,4 +1,5 @@
 import { Laboratory } from '@/types/database';
+import { linkifyText } from '@/lib/linkify';
 
 interface LabTabDescriptionProps {
   lab: Laboratory;
@@ -13,11 +14,14 @@ export function LabTabDescription({ lab }: LabTabDescriptionProps) {
     );
   }
 
+  // Apply linkify to transform URLs into clickable links
+  const linkedDescription = linkifyText(lab.description);
+
   return (
     <div className="prose prose-slate max-w-none">
       <div 
         className="text-foreground leading-relaxed whitespace-pre-wrap"
-        dangerouslySetInnerHTML={{ __html: lab.description }}
+        dangerouslySetInnerHTML={{ __html: linkedDescription }}
       />
     </div>
   );

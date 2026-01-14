@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { usePublicationYears, usePublicationEntries } from '@/hooks/useLaboratories';
 import { BookOpen } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { linkifyText } from '@/lib/linkify';
 
 interface LabTabPublicationsProps {
   labId: string;
@@ -69,9 +70,12 @@ export function LabTabPublications({ labId }: LabTabPublicationsProps) {
         <Skeleton className="h-64 w-full" />
       ) : entries && entries.length > 0 ? (
         <ol className="list-decimal list-outside space-y-1 pl-8 text-justify">
-          {entries.map((entry, index) => (
+          {entries.map((entry) => (
             <li key={entry.id} className="pl-2 leading-relaxed">
-              <span className="text-foreground">{entry.content}</span>
+              <span 
+                className="text-foreground"
+                dangerouslySetInnerHTML={{ __html: linkifyText(entry.content) }}
+              />
             </li>
           ))}
         </ol>

@@ -158,18 +158,49 @@
     transform: translateY(-2px);
   }
 
-  /* Tab Navigation */
+  /* Tab Navigation - Compact & Responsive */
   .tab-trigger {
-    @apply relative px-4 py-3 text-sm font-medium text-muted-foreground transition-colors;
+    @apply relative px-3 py-2 text-xs sm:text-sm font-medium text-muted-foreground transition-colors flex-shrink-0;
+  }
+
+  @media (min-width: 640px) {
+    .tab-trigger {
+      @apply px-4 py-3;
+    }
+  }
+
+  .tab-trigger:hover:not([data-state="active"]) {
+    @apply text-foreground bg-muted/50;
   }
 
   .tab-trigger[data-state="active"] {
-    @apply text-primary;
+    @apply text-primary bg-primary/5;
   }
 
   .tab-trigger[data-state="active"]::after {
     content: '';
     @apply absolute bottom-0 left-0 right-0 h-0.5 bg-primary;
+  }
+
+  /* Tab container scroll */
+  .tabs-scroll-container {
+    @apply flex overflow-x-auto scrollbar-hide -mb-px gap-1 pb-px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .tabs-scroll-container > button {
+    scroll-snap-align: start;
+  }
+
+  /* Hide scrollbar for tabs */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 
   /* Admin Panel Styles */

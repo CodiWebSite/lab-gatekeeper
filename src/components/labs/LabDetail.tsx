@@ -105,15 +105,13 @@ export function LabDetail({ labId }: LabDetailProps) {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-border">
-        <div className="flex overflow-x-auto scrollbar-hide -mb-px">
+      <div className="border-b border-border bg-muted/30 rounded-t-lg">
+        <div className="tabs-scroll-container">
           {LAB_TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
-              className={`tab-trigger whitespace-nowrap ${
-                currentTab === tab.id ? '' : ''
-              }`}
+              className="tab-trigger whitespace-nowrap rounded-t-md"
               data-state={currentTab === tab.id ? 'active' : 'inactive'}
             >
               {tab.label}
