@@ -178,12 +178,24 @@ function TopicsContent({ group }: { group: ResearchGroup }) {
   // Check if content has HTML tags
   const hasHtmlContent = group.topics && /<[a-z][\s\S]*>/i.test(group.topics);
 
-  // Convert plain text to HTML preserving line breaks and whitespace
+  // Convert plain text to HTML preserving ALL formatting
   const formatPlainText = (text: string): string => {
-    // Convert newlines to <br> tags and preserve multiple spaces
-    return text
-      .replace(/\n/g, '<br>')
-      .replace(/  /g, '&nbsp;&nbsp;');
+    // First escape HTML entities to prevent XSS
+    let formatted = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    
+    // Then convert formatting:
+    // - Multiple spaces to non-breaking spaces
+    // - Tabs to spaces
+    // - Line breaks to <br> tags
+    formatted = formatted
+      .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+      .replace(/ {2,}/g, (match) => '&nbsp;'.repeat(match.length))
+      .replace(/\n/g, '<br>');
+    
+    return formatted;
   };
 
   return (
@@ -198,17 +210,22 @@ function TopicsContent({ group }: { group: ResearchGroup }) {
       {/* Topics / Main Research Fields */}
       {group.topics && (
         <div className="space-y-4">
-          <div 
-            className="prose prose-sm max-w-none text-foreground
-              prose-headings:font-bold prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-3
-              prose-ul:list-disc prose-ul:pl-6 prose-ul:space-y-2
-              prose-li:text-foreground
-              prose-strong:font-bold
-              prose-a:text-primary prose-a:hover:underline"
-            dangerouslySetInnerHTML={{ 
-              __html: hasHtmlContent ? group.topics : formatPlainText(group.topics) 
-            }}
-          />
+          {hasHtmlContent ? (
+            <div 
+              className="prose prose-sm max-w-none text-foreground
+                prose-headings:font-bold prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-3
+                prose-ul:list-disc prose-ul:pl-6 prose-ul:space-y-2
+                prose-li:text-foreground
+                prose-strong:font-bold
+                prose-a:text-primary prose-a:hover:underline"
+              dangerouslySetInnerHTML={{ __html: group.topics }}
+            />
+          ) : (
+            <div 
+              className="text-foreground leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: formatPlainText(group.topics) }}
+            />
+          )}
         </div>
       )}
 
