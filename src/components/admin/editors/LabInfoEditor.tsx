@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Laboratory } from '@/types/database';
 import { useUpdateLaboratory } from '@/hooks/useLaboratories';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,7 @@ interface LabInfoEditorProps {
 }
 
 export function LabInfoEditor({ lab }: LabInfoEditorProps) {
+  const { isSuperAdmin } = useAuth();
   const updateLab = useUpdateLaboratory();
   
   const [formData, setFormData] = useState({
@@ -146,19 +148,21 @@ export function LabInfoEditor({ lab }: LabInfoEditorProps) {
           />
         </div>
 
-        <div className="space-y-2 mt-4">
-          <Label htmlFor="explore_url">Link personalizat "Explorează"</Label>
-          <Input
-            id="explore_url"
-            type="url"
-            value={formData.explore_url}
-            onChange={(e) => handleChange('explore_url', e.target.value)}
-            placeholder="https://... (lasă gol pentru pagina internă)"
-          />
-          <p className="text-xs text-muted-foreground">
-            Dacă este completat, butonul "Explorează" va redirecționa către acest link extern.
-          </p>
-        </div>
+        {isSuperAdmin && (
+          <div className="space-y-2 mt-4">
+            <Label htmlFor="explore_url">Link personalizat "Explorează"</Label>
+            <Input
+              id="explore_url"
+              type="url"
+              value={formData.explore_url}
+              onChange={(e) => handleChange('explore_url', e.target.value)}
+              placeholder="https://... (lasă gol pentru pagina internă)"
+            />
+            <p className="text-xs text-muted-foreground">
+              Dacă este completat, butonul "Explorează" va redirecționa către acest link extern.
+            </p>
+          </div>
+        )}
 
         <div className="space-y-2 mt-4">
           <Label htmlFor="description">Descriere</Label>
