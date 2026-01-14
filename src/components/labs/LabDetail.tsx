@@ -1,9 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
-import { ArrowLeft, FlaskConical, User, Mail, Phone, MapPin } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { FlaskConical, User, Mail, Phone, MapPin } from 'lucide-react';
 import { useLaboratory } from '@/hooks/useLaboratories';
 import { LabTab, LAB_TABS } from '@/types/database';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LabTabDescription } from './tabs/LabTabDescription';
 import { LabTabGroups } from './tabs/LabTabGroups';
@@ -39,26 +37,12 @@ export function LabDetail({ labId }: LabDetailProps) {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground">Laboratorul nu a fost găsit.</p>
-        <Link to="/labs?view=list">
-          <Button variant="outline" className="mt-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Înapoi la listă
-          </Button>
-        </Link>
       </div>
     );
   }
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Back button */}
-      <Link to="/labs?view=list">
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Toate laboratoarele
-        </Button>
-      </Link>
-
       {/* Header */}
       <div className="header-gradient rounded-xl p-6 md:p-8 text-primary-foreground">
         <div className="flex flex-col md:flex-row gap-6 items-start">
