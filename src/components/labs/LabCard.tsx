@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, User, FlaskConical } from 'lucide-react';
+import { ArrowRight, User } from 'lucide-react';
 import { Laboratory } from '@/types/database';
 import { Button } from '@/components/ui/button';
 
@@ -9,57 +9,35 @@ interface LabCardProps {
 
 export function LabCard({ lab }: LabCardProps) {
   return (
-    <div className="lab-card group">
-      {/* Logo/Image */}
-      <div className="aspect-[16/9] bg-secondary overflow-hidden">
-        {lab.logo_url ? (
-          <img
-            src={lab.logo_url}
-            alt={lab.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-            <FlaskConical className="w-16 h-16 text-primary/40" />
-          </div>
-        )}
-      </div>
-
+    <div className="lab-card group p-4 flex flex-col sm:flex-row sm:items-center gap-4">
       {/* Content */}
-      <div className="p-5 space-y-4">
-        <div>
-          <h3 className="font-heading text-lg font-semibold text-foreground line-clamp-2 mb-2">
-            {lab.name}
-          </h3>
-          
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <User className="w-4 h-4 flex-shrink-0" />
-            <span className="text-sm truncate">{lab.head_name}</span>
-          </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-heading text-base font-semibold text-foreground line-clamp-1 mb-1">
+          {lab.name}
+        </h3>
+        
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <User className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="text-sm truncate">{lab.head_name}</span>
         </div>
-
-        {lab.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {lab.description}
-          </p>
-        )}
-
-        {lab.explore_url ? (
-          <a href={lab.explore_url} target="_blank" rel="noopener noreferrer">
-            <Button className="w-full group/btn" variant="default">
-              <span>Explorează</span>
-              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover/btn:translate-x-1" />
-            </Button>
-          </a>
-        ) : (
-          <Link to={`/labs?lab=${lab.id}`}>
-            <Button className="w-full group/btn" variant="default">
-              <span>Explorează</span>
-              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover/btn:translate-x-1" />
-            </Button>
-          </Link>
-        )}
       </div>
+
+      {/* Button */}
+      {lab.explore_url ? (
+        <a href={lab.explore_url} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
+          <Button size="sm" className="group/btn" variant="default">
+            <span>Explorează</span>
+            <ArrowRight className="w-3.5 h-3.5 ml-1.5 transition-transform group-hover/btn:translate-x-1" />
+          </Button>
+        </a>
+      ) : (
+        <Link to={`/labs?lab=${lab.id}`} className="flex-shrink-0">
+          <Button size="sm" className="group/btn" variant="default">
+            <span>Explorează</span>
+            <ArrowRight className="w-3.5 h-3.5 ml-1.5 transition-transform group-hover/btn:translate-x-1" />
+          </Button>
+        </Link>
+      )}
     </div>
   );
 }

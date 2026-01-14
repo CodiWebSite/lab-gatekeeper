@@ -45,17 +45,16 @@ export function LabList() {
         />
       </div>
 
-      {/* Grid */}
+      {/* List */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="space-y-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="space-y-4">
-              <Skeleton className="aspect-[16/9] rounded-lg" />
-              <div className="space-y-2 p-5">
-                <Skeleton className="h-6 w-3/4" />
+            <div key={i} className="flex items-center gap-4 p-4 bg-card rounded-lg border border-border">
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-5 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-10 w-full mt-4" />
               </div>
+              <Skeleton className="h-8 w-24" />
             </div>
           ))}
         </div>
@@ -68,7 +67,7 @@ export function LabList() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+        <div className="space-y-3 animate-fade-in">
           {filteredLabs.map((lab) => (
             <LabCard key={lab.id} lab={lab} />
           ))}
