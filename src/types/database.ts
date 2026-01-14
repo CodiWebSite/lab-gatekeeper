@@ -43,6 +43,7 @@ export interface ResearchGroup {
   updated_at: string;
 }
 
+// Old Publication interface (kept for backward compatibility)
 export interface Publication {
   id: string;
   lab_id: string;
@@ -56,6 +57,16 @@ export interface Publication {
   url: string | null;
   abstract: string | null;
   display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// New PublicationYear interface for free-form content per year
+export interface PublicationYear {
+  id: string;
+  lab_id: string;
+  year: number;
+  content: string;
   created_at: string;
   updated_at: string;
 }
